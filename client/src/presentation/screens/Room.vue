@@ -12,6 +12,14 @@ const DEFAULT_MANAGER_USERNAME = 'your_manager_username_here'
 const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? DEFAULT_MANAGER_USERNAME
 const TELEGRAM_MESSAGE_LIMIT = 3500
 
+interface TelegramWindow extends Window {
+  Telegram?: {
+    WebApp?: {
+      openTelegramLink: (telegramLink: string) => void;
+    };
+  };
+}
+
 const props = defineProps({
   /**
    * Selected hotel identifier (got from route params)
@@ -39,7 +47,7 @@ const roomId = computed(() => props.roomId)
 
 const { days, trip } = useTripDetails()
 const { hotel } = useHotel(hotelId)
-const { setButtonLoader, showAlert, openTelegramLink, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
+const { setButtonLoader, showAlert, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
 const router = useRouter()
 
 /**
@@ -110,11 +118,18 @@ async function buttonClicked(): Promise<void> {
   }
 
   const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
+  const telegramWebApp = (window as TelegramWindow).Telegram?.WebApp
 
   setButtonLoader(false)
 
-  if (openTelegramLink(telegramLink)) {
-    return
+  if (typeof telegramWebApp?.openTelegramLink === 'function') {
+    try {
+      telegramWebApp.openTelegramLink(telegramLink)
+      return
+    } catch (error) {
+      console.error('Failed to open Telegram manager chat link', error)
+      showAlert('Cannot open Telegram chat. Please try again.')
+    }
   }
 
   window.open(telegramLink, '_blank')
