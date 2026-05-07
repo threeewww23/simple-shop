@@ -39,7 +39,7 @@ const roomId = computed(() => props.roomId)
 
 const { days, trip } = useTripDetails()
 const { hotel } = useHotel(hotelId)
-const { setButtonLoader, showAlert, openTelegramLink, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
+const { setButtonLoader, showAlert, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
 const router = useRouter()
 
 /**
@@ -110,10 +110,18 @@ async function buttonClicked(): Promise<void> {
   }
 
   const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
+  const telegramWindow = window as Window & {
+    Telegram?: {
+      WebApp?: {
+        openTelegramLink: (telegramLink: string) => void;
+      };
+    };
+  }
 
   setButtonLoader(false)
 
-  if (openTelegramLink(telegramLink)) {
+  if (typeof telegramWindow.Telegram?.WebApp?.openTelegramLink === 'function') {
+    telegramWindow.Telegram.WebApp.openTelegramLink(telegramLink)
     return
   }
 

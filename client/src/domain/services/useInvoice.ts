@@ -1,5 +1,4 @@
 import type LabeledPrice from '@/domain/entities/LabeledPrice'
-import Transport from '@/infra/transport/api'
 
 interface useInvoiceComposableState {
   create: (params: CreateInvoiceParams) => Promise<string | null>;
@@ -99,26 +98,14 @@ interface CreateInvoiceParams {
  * Service to create a new invoice
  */
 export default function useInvoice(): useInvoiceComposableState {
-  const url = import.meta.env.VITE_API_HOST
-
   /**
-   * @todo use IoC container
-   */
-  const transport = new Transport(url)
-
-  /**
-   * Create a new invoice
+   * In serverless/static mode we do not create backend invoices.
+   * Checkout is handled by redirecting to manager chat from Room screen.
    *
-   * @param params - Params for creating a new invoice
+   * @param _params - Params for creating a new invoice
    */
-  const create = async (params: CreateInvoiceParams): Promise<string | null> => {
-    try {
-      const response = await transport.post('/createInvoice', params)
-
-      return (response as { invoiceLink: string }).invoiceLink
-    } catch (e) {
-      return null
-    }
+  const create = async (_params: CreateInvoiceParams): Promise<string | null> => {
+    return null
   }
 
   /**

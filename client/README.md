@@ -22,7 +22,7 @@ Telebook — is a fictional hotel booking service integrated to Telegram. It use
 - ❤️‍🔥 Instant picture previews and on-device cache
 - 💎 Clean but simple architecture
 - ✨ Hot Reloading
-- 💰 Payments support
+- 💬 Checkout redirect to manager chat via Telegram Web App SDK
 
 ## Telegram Vue UI Kit
 
@@ -73,7 +73,7 @@ cp .env.example .env
 | Name | Description | Example | Where to get |
 | -- | -- | -- | -- |
 | VITE_WEB_HOST | Web client endpoint | `https://xxxx-xx-xxx-xxx-xx.ngrok-free.app` | Use ngrok host for local development and your production host on real environemnt |
-| VITE_API_HOST | Backend endpoint | `https://xxxx-xx-xxx-xxx-xx.ngrok-free.app` | Use ngrok host for local development and your production host on real environemnt |
+| VITE_MANAGER_USERNAME | Telegram manager username (without `@`) | `your_manager_username_here` | Telegram username of the shop manager who should receive order text |
 
 3. Run
 
