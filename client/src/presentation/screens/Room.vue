@@ -110,18 +110,12 @@ async function buttonClicked(): Promise<void> {
   }
 
   const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
-  const telegramWindow = window as Window & {
-    Telegram?: {
-      WebApp?: {
-        openTelegramLink: (telegramLink: string) => void;
-      };
-    };
-  }
+  const telegramWebApp = (window as any).Telegram?.WebApp
 
   setButtonLoader(false)
 
-  if (typeof telegramWindow.Telegram?.WebApp?.openTelegramLink === 'function') {
-    telegramWindow.Telegram.WebApp.openTelegramLink(telegramLink)
+  if (typeof telegramWebApp?.openTelegramLink === 'function') {
+    telegramWebApp.openTelegramLink(telegramLink)
     return
   }
 
