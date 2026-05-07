@@ -8,7 +8,8 @@ import { formatDate } from '@/infra/utils/date'
 import { spaced } from '@/infra/utils/number'
 import { useRouter } from 'vue-router'
 
-const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? 'your_manager_username_here'
+const DEFAULT_MANAGER_USERNAME = 'your_manager_username_here'
+const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? DEFAULT_MANAGER_USERNAME
 const TELEGRAM_MESSAGE_LIMIT = 3500
 
 const props = defineProps({
@@ -93,7 +94,7 @@ async function buttonClicked(): Promise<void> {
   let safeOrderText = orderText
 
   while (encodeURIComponent(safeOrderText).length > TELEGRAM_MESSAGE_LIMIT && safeOrderText.length > 0) {
-    safeOrderText = safeOrderText.slice(0, -1)
+    safeOrderText = Array.from(safeOrderText).slice(0, -1).join('')
   }
 
   if (safeOrderText !== orderText) {
@@ -102,7 +103,7 @@ async function buttonClicked(): Promise<void> {
 
   const managerUsername = MANAGER_USERNAME.replace('@', '').trim()
 
-  if (managerUsername.length === 0 || managerUsername === 'your_manager_username_here') {
+  if (managerUsername.length === 0 || managerUsername === DEFAULT_MANAGER_USERNAME) {
     showAlert('Manager username is not configured')
     setButtonLoader(false)
     return
