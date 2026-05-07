@@ -72,7 +72,7 @@ cp .env.example .env
 
 | Name | Description | Example | Where to get |
 | -- | -- | -- | -- |
-| VITE_WEB_HOST | Web client endpoint | `https://xxxx-xx-xxx-xxx-xx.ngrok-free.app` | Use ngrok host for local development and your production host on real environemnt |
+| VITE_WEB_HOST | Web client endpoint | `https://xxxx-xx-xxx-xxx-xx.ngrok-free.app` | Use ngrok host for local development and your production host on real environment |
 | VITE_MANAGER_USERNAME | Telegram manager username (without `@`) | `your_manager_username_here` | Telegram username of the shop manager who should receive order text |
 
 3. Run
