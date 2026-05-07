@@ -9,6 +9,7 @@ import { spaced } from '@/infra/utils/number'
 import { useRouter } from 'vue-router'
 
 const MANAGER_USERNAME = 'your_manager_username_here'
+const TELEGRAM_MESSAGE_LIMIT = 3500
 
 const props = defineProps({
   /**
@@ -65,14 +66,6 @@ const roomAmount = computed(() => {
   return room.value.price * days.value + transfer
 })
 
-type TelegramWindow = Window & {
-  Telegram?: {
-    WebApp?: {
-      openTelegramLink: (url: string) => void;
-    };
-  };
-}
-
 /**
  * Main button click handler
  */
@@ -97,11 +90,25 @@ async function buttonClicked(): Promise<void> {
     `Total: ${roomAmount.value}$`,
   ].join('\n')
 
-  const telegramLink = `https://t.me/${MANAGER_USERNAME}?text=${encodeURIComponent(orderText)}`
+  const safeOrderText = orderText.length > TELEGRAM_MESSAGE_LIMIT
+    ? `${orderText.slice(0, TELEGRAM_MESSAGE_LIMIT)}...`
+    : orderText
+
+  if (safeOrderText !== orderText) {
+    showAlert('Booking text was shortened to fit Telegram limits')
+  }
+
+  const telegramLink = `https://t.me/${MANAGER_USERNAME}?text=${encodeURIComponent(safeOrderText)}`
 
   setButtonLoader(false)
 
-  const telegramWindow = window as TelegramWindow
+  const telegramWindow = window as Window & {
+    Telegram?: {
+      WebApp?: {
+        openTelegramLink: (url: string) => void;
+      };
+    };
+  }
 
   if (telegramWindow.Telegram?.WebApp !== undefined) {
     telegramWindow.Telegram.WebApp.openTelegramLink(telegramLink)
