@@ -101,7 +101,7 @@ async function buttonClicked(): Promise<void> {
     showAlert('Booking text was shortened to fit Telegram limits')
   }
 
-  const managerUsername = MANAGER_USERNAME.replace('@', '').trim()
+  const managerUsername = MANAGER_USERNAME.replace(/^@+/, '').trim()
 
   if (managerUsername.length === 0 || managerUsername === DEFAULT_MANAGER_USERNAME) {
     showAlert('Manager username is not configured')

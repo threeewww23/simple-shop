@@ -178,7 +178,7 @@ export default function useTelegram(): useTelegramComposableState {
       };
     }
 
-    if (telegramWindow.Telegram?.WebApp === undefined || typeof telegramWindow.Telegram.WebApp.openTelegramLink !== 'function') {
+    if (typeof telegramWindow.Telegram?.WebApp?.openTelegramLink !== 'function') {
       return false
     }
 
