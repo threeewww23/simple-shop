@@ -125,7 +125,8 @@ async function buttonClicked(): Promise<void> {
   if (typeof telegramWebApp?.openTelegramLink === 'function') {
     try {
       telegramWebApp.openTelegramLink(telegramLink)
-    } catch {
+    } catch (error) {
+      console.error('Failed to open Telegram manager chat link', error)
       showAlert('Cannot open Telegram chat. Please try again.')
       window.open(telegramLink, '_blank')
     }
