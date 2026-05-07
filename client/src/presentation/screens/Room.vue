@@ -12,6 +12,14 @@ const DEFAULT_MANAGER_USERNAME = 'your_manager_username_here'
 const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? DEFAULT_MANAGER_USERNAME
 const TELEGRAM_MESSAGE_LIMIT = 3500
 
+interface TelegramWindow extends Window {
+  Telegram?: {
+    WebApp?: {
+      openTelegramLink: (telegramLink: string) => void;
+    };
+  };
+}
+
 const props = defineProps({
   /**
    * Selected hotel identifier (got from route params)
@@ -110,12 +118,18 @@ async function buttonClicked(): Promise<void> {
   }
 
   const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
-  const telegramWebApp = (window as any).Telegram?.WebApp
+  const telegramWebApp = (window as TelegramWindow).Telegram?.WebApp
 
   setButtonLoader(false)
 
   if (typeof telegramWebApp?.openTelegramLink === 'function') {
-    telegramWebApp.openTelegramLink(telegramLink)
+    try {
+      telegramWebApp.openTelegramLink(telegramLink)
+    } catch {
+      showAlert('Cannot open Telegram chat. Please try again.')
+      window.open(telegramLink, '_blank')
+    }
+
     return
   }
 
