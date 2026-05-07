@@ -8,7 +8,7 @@ import { formatDate } from '@/infra/utils/date'
 import { spaced } from '@/infra/utils/number'
 import { useRouter } from 'vue-router'
 
-const MANAGER_USERNAME = 'your_manager_username_here'
+const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? 'your_manager_username_here'
 const TELEGRAM_MESSAGE_LIMIT = 3500
 
 const props = defineProps({
