@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { useHotel, useTripDetails, useInvoice } from '@/domain/services'
+import { useHotel, useTripDetails } from '@/domain/services'
 import { useTelegram } from '@/application/services'
 import { PageWithHeader, Placeholder, Icon, Section, Sections, List, ListItem, Amount, Avatar, FixedFooter } from '@/presentation/components'
 import { amenities } from '@/infra/store/hotels/mock/amenities'
 import { formatDate } from '@/infra/utils/date'
 import { spaced } from '@/infra/utils/number'
 import { useRouter } from 'vue-router'
+
+const MANAGER_USERNAME = 'your_manager_username_here'
 
 const props = defineProps({
   /**
@@ -35,8 +37,7 @@ const roomId = computed(() => props.roomId)
 
 const { days, trip } = useTripDetails()
 const { hotel } = useHotel(hotelId)
-const { setButtonLoader, showAlert, openInvoice, closeApp, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
-const { create: createInvoice, toPrice } = useInvoice()
+const { setButtonLoader, showAlert, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
 const router = useRouter()
 
 /**
@@ -64,79 +65,50 @@ const roomAmount = computed(() => {
   return room.value.price * days.value + transfer
 })
 
+type TelegramWindow = Window & {
+  Telegram?: {
+    WebApp?: {
+      openTelegramLink: (url: string) => void;
+    };
+  };
+}
+
 /**
  * Main button click handler
  */
 async function buttonClicked(): Promise<void> {
   setButtonLoader(true)
 
-  if (room.value === undefined) {
+  if (room.value === undefined || hotel.value === undefined) {
     showAlert('Room not found')
+    setButtonLoader(false)
 
     return
   }
 
-  const invoiceLink = await createInvoice({
-    title: room.value.title,
-    description: `${formatDate(trip.startDate, true)} — ${formatDate(trip.endDate, true)}`,
-    currency: 'USD',
-    photo_url: `${import.meta.env.VITE_WEB_HOST}/${room.value.picture}`,
-    photo_size: 126989,
-    photo_width: 1024,
-    photo_height: 1024,
-    need_name: true,
-    prices: [
-      {
-        label: `Room ${days.value} × ${room.value.price}$`,
-        amount: toPrice(room.value.price * days.value),
-      },
-      {
-        label: 'Transfer',
-        amount: toPrice(100),
-      },
-      {
-        label: 'Service fee',
-        amount: 0,
-      },
-      {
-        label: 'Breakfast included',
-        amount: 0,
-      },
-    ],
-  })
+  const orderText = [
+    'New Booking:',
+    `Hotel: ${hotel.value.title}`,
+    `Room: ${room.value.title}`,
+    `Dates: ${formatDate(trip.startDate, true)} — ${formatDate(trip.endDate, true)}`,
+    `Nights: ${days.value}`,
+    `Room Price: ${room.value.price}$ × ${days.value} = ${room.value.price * days.value}$`,
+    'Transfer: 100$',
+    `Total: ${roomAmount.value}$`,
+  ].join('\n')
+
+  const telegramLink = `https://t.me/${MANAGER_USERNAME}?text=${encodeURIComponent(orderText)}`
 
   setButtonLoader(false)
 
-  if (invoiceLink === null) {
-    showAlert('Could not create invoice 😔')
+  const telegramWindow = window as TelegramWindow
 
+  if (telegramWindow.Telegram?.WebApp !== undefined) {
+    telegramWindow.Telegram.WebApp.openTelegramLink(telegramLink)
     return
   }
 
-  /**
-   * Open invoice in TWA
-   *
-   * @param invoiceLink - Invoice link
-   * @param callback - on-close callback. Statuses:  "pending" | "failed" | "cancelled" | "paid"
-   */
-  openInvoice(invoiceLink, (closingStatus) => {
-    switch (closingStatus) {
-      case 'paid':
-        closeApp()
-        break
-      case 'cancelled':
-        // WebApp.showAlert('canceled')
-        break
-      case 'failed':
-        // WebApp.showAlert('expired')
-        break
-      case 'pending':
-        // WebApp.showAlert('pending')
-        break
-      default:
-        // WebApp.showAlert('unknown')
-    }
-  })
+  window.open(telegramLink, '_blank')
 }
 
 /**
@@ -316,7 +288,6 @@ onBeforeUnmount(() => {
     opacity: 0;
   }
 }
-
 
 @keyframes shake {
   0% {
