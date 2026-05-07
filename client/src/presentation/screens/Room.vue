@@ -38,7 +38,7 @@ const roomId = computed(() => props.roomId)
 
 const { days, trip } = useTripDetails()
 const { hotel } = useHotel(hotelId)
-const { setButtonLoader, showAlert, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
+const { setButtonLoader, showAlert, openTelegramLink, showMainButton, hideMainButton, showBackButton, hideBackButton } = useTelegram()
 const router = useRouter()
 
 /**
@@ -90,9 +90,11 @@ async function buttonClicked(): Promise<void> {
     `Total: ${roomAmount.value}$`,
   ].join('\n')
 
-  const safeOrderText = orderText.length > TELEGRAM_MESSAGE_LIMIT
-    ? `${orderText.slice(0, TELEGRAM_MESSAGE_LIMIT)}...`
-    : orderText
+  let safeOrderText = orderText
+
+  while (encodeURIComponent(safeOrderText).length > TELEGRAM_MESSAGE_LIMIT && safeOrderText.length > 0) {
+    safeOrderText = safeOrderText.slice(0, -1)
+  }
 
   if (safeOrderText !== orderText) {
     showAlert('Booking text was shortened to fit Telegram limits')
@@ -102,16 +104,7 @@ async function buttonClicked(): Promise<void> {
 
   setButtonLoader(false)
 
-  const telegramWindow = window as Window & {
-    Telegram?: {
-      WebApp?: {
-        openTelegramLink: (url: string) => void;
-      };
-    };
-  }
-
-  if (telegramWindow.Telegram?.WebApp !== undefined) {
-    telegramWindow.Telegram.WebApp.openTelegramLink(telegramLink)
+  if (openTelegramLink(telegramLink)) {
     return
   }
 

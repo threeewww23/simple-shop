@@ -8,6 +8,7 @@ interface useTelegramComposableState {
   hideBackButton: () => void;
   setButtonLoader: (state: boolean) => void;
   showAlert: (text: string) => void;
+  openTelegramLink: (url: string) => boolean;
   openInvoice: (url: string, callback: (status: 'pending' | 'failed' | 'cancelled' | 'paid') => void) => void;
   closeApp: () => void;
   expand: () => void;
@@ -166,6 +167,27 @@ export default function useTelegram(): useTelegramComposableState {
   }
 
   /**
+   * Opens Telegram link via WebApp API
+   */
+  function openTelegramLink(url: string): boolean {
+    const telegramWindow = window as Window & {
+      Telegram?: {
+        WebApp?: {
+          openTelegramLink: (telegramLink: string) => void;
+        };
+      };
+    }
+
+    if (telegramWindow.Telegram?.WebApp === undefined) {
+      return false
+    }
+
+    telegramWindow.Telegram.WebApp.openTelegramLink(url)
+
+    return true
+  }
+
+  /**
    * Opens Telegram invoice
    *
    * @param url The invoice URL
@@ -260,6 +282,7 @@ export default function useTelegram(): useTelegramComposableState {
     hideMainButton,
     setButtonLoader,
     showAlert,
+    openTelegramLink,
     openInvoice,
     closeApp,
     expand,
