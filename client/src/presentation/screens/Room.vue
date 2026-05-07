@@ -100,7 +100,15 @@ async function buttonClicked(): Promise<void> {
     showAlert('Booking text was shortened to fit Telegram limits')
   }
 
-  const telegramLink = `https://t.me/${MANAGER_USERNAME}?text=${encodeURIComponent(safeOrderText)}`
+  const managerUsername = MANAGER_USERNAME.replace('@', '').trim()
+
+  if (managerUsername.length === 0 || managerUsername === 'your_manager_username_here') {
+    showAlert('Manager username is not configured')
+    setButtonLoader(false)
+    return
+  }
+
+  const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
 
   setButtonLoader(false)
 
