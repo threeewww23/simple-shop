@@ -121,7 +121,7 @@ export default function useTelegram(): useTelegramComposableState {
     WebApp.BackButton.show()
 
     if (debugBackButton.value !== undefined) {
-      debugBackButton.value.innerText = '‹ Back'
+      debugBackButton.value.innerText = '‹ Назад'
       debugBackButton.value.addEventListener('click', backButtonCallback.value)
       debugBackButton.value.classList.add('visible')
     }
