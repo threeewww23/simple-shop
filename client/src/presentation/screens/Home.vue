@@ -13,14 +13,17 @@ const searchQuery = ref('')
 const minPriceQuery = ref('')
 const maxPriceQuery = ref('')
 
-const minPrice = computed(() => {
-  const parsed = Number(minPriceQuery.value)
+function parsePositiveNumber(value: string): number | undefined {
+  const parsed = Number(value)
   return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+}
+
+const minPrice = computed(() => {
+  return parsePositiveNumber(minPriceQuery.value)
 })
 
 const maxPrice = computed(() => {
-  const parsed = Number(maxPriceQuery.value)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : undefined
+  return parsePositiveNumber(maxPriceQuery.value)
 })
 
 const filteredProducts = computed(() => {

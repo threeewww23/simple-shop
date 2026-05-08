@@ -12,7 +12,7 @@ export interface CartItem {
   quantity: number;
 }
 
-interface useCartComposableState {
+interface UseCartComposableState {
   cartItems: ComputedRef<CartItem[]>;
   totalPrice: ComputedRef<number>;
   totalCount: ComputedRef<number>;
@@ -27,7 +27,7 @@ const cartState = reactive({
   items: [] as CartItem[],
 })
 
-export const useCart = createSharedComposable((): useCartComposableState => {
+export const useCart = createSharedComposable((): UseCartComposableState => {
   const cartItems = computed(() => cartState.items)
 
   const totalPrice = computed(() => {

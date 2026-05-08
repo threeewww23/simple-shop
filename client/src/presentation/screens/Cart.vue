@@ -48,10 +48,7 @@ async function checkout(): Promise<void> {
     return
   }
 
-  const receiptItems = cartItems.value.map((item, index) => {
-    const itemTotal = item.price * item.quantity
-    return `${index + 1}. ${item.title}\n   ${item.quantity} x ${item.price}₽ = ${itemTotal}₽`
-  })
+  const receiptItems = cartItems.value.map((item, index) => formatReceiptItem(item, index))
 
   const orderText = [
     'Новый заказ:',
@@ -92,6 +89,18 @@ async function checkout(): Promise<void> {
 
   clearCart()
   void router.push('/')
+}
+
+function formatReceiptItem(
+  item: {
+    title: string;
+    price: number;
+    quantity: number;
+  },
+  index: number,
+): string {
+  const itemTotal = item.price * item.quantity
+  return `${index + 1}. ${item.title}\n${item.quantity} x ${item.price}₽ = ${itemTotal}₽`
 }
 
 onMounted(() => {
