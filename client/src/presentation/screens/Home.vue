@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Amount, List, ListItem, Placeholder, Section, Sections } from '@/presentation/components'
-import { hotels } from '@/infra/store/hotels/mock/hotels'
+import { products } from '@/infra/store/hotels/mock/hotels'
 import { useTelegram } from '@/application/services'
 import { onBeforeUnmount, onMounted } from 'vue'
 
@@ -31,7 +31,7 @@ onBeforeUnmount(() => {
     <Section padded>
       <List gapped>
         <ListItem
-          v-for="product in hotels"
+          v-for="product in products"
           :id="product.id"
           :key="product.id"
           :avatar="{ src: product.picture, placeholder: product.title, pictureThumb: product.pictureThumb }"

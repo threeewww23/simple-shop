@@ -1,6 +1,6 @@
 import type Hotel from '@/domain/entities/Hotel'
 
-export const hotels: Hotel[] = [
+export const products: Hotel[] = [
   {
     id: 1,
     title: 'Air Runner X1',
@@ -130,3 +130,5 @@ export const hotels: Hotel[] = [
     ],
   },
 ]
+
+export const hotels = products

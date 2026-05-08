@@ -16,7 +16,8 @@ const props = defineProps({
 }
 
 const productId = computed(() => props.id)
-const { hotel: product } = useHotel(productId)
+const { hotel } = useHotel(productId)
+const product = computed(() => hotel.value)
 const { setButtonLoader, showAlert, showBackButton, hideBackButton, hideMainButton, openTelegramLink } = useTelegram()
 const router = useRouter()
 
@@ -62,7 +63,11 @@ async function buttonClicked(): Promise<void> {
   setButtonLoader(false)
 
   if (!openTelegramLink(telegramLink)) {
-    window.open(telegramLink, '_blank')
+    const openedWindow = window.open(telegramLink, '_blank')
+
+    if (openedWindow === null) {
+      showAlert('Не удалось открыть Telegram. Разрешите всплывающие окна и попробуйте снова')
+    }
   }
 }
 
