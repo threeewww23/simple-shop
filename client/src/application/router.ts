@@ -1,6 +1,7 @@
 import { type RouteRecordRaw, createRouter, createWebHistory } from 'vue-router'
 import Home from '@/presentation/screens/Home.vue'
 import Room from '@/presentation/screens/Room.vue'
+import Cart from '@/presentation/screens/Cart.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -13,6 +14,10 @@ const routes: RouteRecordRaw[] = [
     props: route => ({
       id: parseInt(route.params.id as string, 10),
     }),
+  },
+  {
+    path: '/cart',
+    component: Cart,
   },
 ]
 
