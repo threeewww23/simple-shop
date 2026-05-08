@@ -1,13 +1,9 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted } from 'vue'
-import { useHotel } from '@/domain/services'
+import { useCart, useHotel } from '@/domain/services'
 import { useTelegram } from '@/application/services'
 import { PageWithHeader, Placeholder, Section, Sections, List, ListItem, Amount, Avatar, Text } from '@/presentation/components'
 import { useRouter } from 'vue-router'
-
-const DEFAULT_MANAGER_USERNAME = 'your_manager_username_here'
-const MANAGER_USERNAME = (import.meta.env.VITE_MANAGER_USERNAME as string | undefined) ?? DEFAULT_MANAGER_USERNAME
-const TELEGRAM_MESSAGE_LIMIT = 3500
 
 const props = defineProps({
   id: Number,
@@ -18,57 +14,22 @@ const props = defineProps({
 const productId = computed(() => props.id)
 const { hotel } = useHotel(productId)
 const product = computed(() => hotel.value)
-const { setButtonLoader, showAlert, showBackButton, hideBackButton, hideMainButton, openTelegramLink } = useTelegram()
+const { addItem, getItemQuantity, totalCount } = useCart()
+const { showAlert, showBackButton, hideBackButton, hideMainButton } = useTelegram()
 const router = useRouter()
 
-async function buttonClicked(): Promise<void> {
-  setButtonLoader(true)
-
+function addToCart(): void {
   if (product.value === undefined) {
     showAlert('Товар не найден')
-    setButtonLoader(false)
-
     return
   }
 
-  const orderText = [
-    'Новый заказ:',
-    `Модель: ${product.value.title}`,
-    `Описание: ${product.value.subtitle}`,
-    `Цена: ${product.value.price}₽`,
-    'Количество: 1',
-    `Итого: ${product.value.price}₽`,
-  ].join('\n')
+  addItem(product.value)
+  showAlert('Товар добавлен в корзину')
+}
 
-  let safeOrderText = orderText
-
-  while (encodeURIComponent(safeOrderText).length > TELEGRAM_MESSAGE_LIMIT && safeOrderText.length > 0) {
-    safeOrderText = Array.from(safeOrderText).slice(0, -1).join('')
-  }
-
-  if (safeOrderText !== orderText) {
-    showAlert('Текст заказа был сокращён, чтобы соответствовать лимитам Telegram')
-  }
-
-  const managerUsername = MANAGER_USERNAME.replace(/^@+/, '').trim()
-
-  if (managerUsername.length === 0 || managerUsername === DEFAULT_MANAGER_USERNAME) {
-    showAlert('Не настроен username менеджера')
-    setButtonLoader(false)
-    return
-  }
-
-  const telegramLink = `https://t.me/${managerUsername}?text=${encodeURIComponent(safeOrderText)}`
-
-  setButtonLoader(false)
-
-  if (!openTelegramLink(telegramLink)) {
-    const openedWindow = window.open(telegramLink, '_blank')
-
-    if (openedWindow === null) {
-      showAlert('Не удалось открыть Telegram. Разрешите всплывающие окна и попробуйте снова')
-    }
-  }
+function goToCart(): void {
+  void router.push('/cart')
 }
 
 onMounted(() => {
@@ -139,9 +100,9 @@ onBeforeUnmount(() => {
                   <Amount>{{ product.price }}₽</Amount>
                 </template>
               </ListItem>
-              <ListItem label="Итого">
+              <ListItem label="В корзине">
                 <template #right>
-                  <Amount>{{ product.price }}₽</Amount>
+                  <Amount>{{ getItemQuantity(product.id) }}</Amount>
                 </template>
               </ListItem>
             </List>
@@ -151,9 +112,19 @@ onBeforeUnmount(() => {
             <button
               type="button"
               class="buy-button"
-              @click="buttonClicked"
+              @click="addToCart"
             >
-              Купить
+              Добавить в корзину
+            </button>
+          </Section>
+
+          <Section padded>
+            <button
+              type="button"
+              class="cart-button"
+              @click="goToCart"
+            >
+              Перейти в корзину ({{ totalCount }})
             </button>
           </Section>
         </Sections>
@@ -182,6 +153,18 @@ onBeforeUnmount(() => {
   background: var(--color-button);
   color: var(--color-button-text);
   font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cart-button {
+  width: 100%;
+  height: 44px;
+  border: none;
+  border-radius: var(--size-border-radius-big);
+  background: var(--color-bg-secondary);
+  color: var(--color-text);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
 }
